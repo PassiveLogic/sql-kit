@@ -11,10 +11,11 @@ env:
 
 jobs:
   unit-tests:
-    uses: vapor/ci/.github/workflows/run-unit-tests.yml@main
+    uses: passivelogic/vapor-ci/.github/workflows/run-unit-tests.yml@feat/add-swift-wasm-ci
     secrets: inherit
     with:
       with_android: true
+      with_wasm: true
 
   pure-fluent-integration-test:
     if: ${{ !(github.event.pull_request.draft || false) }}
