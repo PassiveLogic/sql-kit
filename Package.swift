@@ -16,7 +16,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/apple/swift-collections.git", from: "1.1.0"),
         .package(url: "https://github.com/apple/swift-log.git", from: "1.5.4"),
-        // TODO: Require a minimum swift-nio version once latest nio core fixes are versionized.
+        // TODO: sm: Require a minimum swift-nio version once latest nio core fixes are versionized.
         // .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0.TBD"),
         .package(url: "https://github.com/apple/swift-nio.git", branch: "main"),
     ],
