@@ -20,7 +20,10 @@ let package = Package(
         // This older version is left as-is to avoid placing restrictions
         // on other targets. But to compile for wasm, make sure you have
         // a version of swift-nio with a passing build for the NIOCore module.
-        .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0"),
+
+        // TODO: 7-sm-wasm: use updated version
+        // .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0"),
+        .package(url: "https://github.com/PassiveLogic/swift-nio.git", branch: "feat/swift-wasm-support"),
     ],
     targets: [
         .target(
