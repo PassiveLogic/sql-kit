@@ -34,7 +34,7 @@ extension SQLCommonTableExpressionBuilder {
     @inlinable
     @discardableResult
     public func with(_ name: some StringProtocol, columns: [String], as query: some SQLExpression) -> Self {
-        self.with(name, columns: columns.map(SQLIdentifier.init(_:)), as: query)
+        self.with(name, columns: columns.map { SQLIdentifier($0) as any SQLExpression }, as: query)
     }
 
     /// Specify a subquery to include as a _recursive_ common table expression, for use elsewhere in
@@ -70,7 +70,7 @@ extension SQLCommonTableExpressionBuilder {
     @inlinable
     @discardableResult
     public func with(recursive name: some StringProtocol, columns: [String], as query: some SQLExpression) -> Self {
-        self.with(recursive: name, columns: columns.map(SQLIdentifier.init(_:)), as: query)
+        self.with(recursive: name, columns: columns.map { SQLIdentifier($0) as any SQLExpression }, as: query)
     }
 
     // MARK: - String name, expression columns
@@ -170,7 +170,7 @@ extension SQLCommonTableExpressionBuilder {
     @inlinable
     @discardableResult
     public func with(_ name: some SQLExpression, columns: [String], as query: some SQLExpression) -> Self {
-        self.with(name, columns: columns.map(SQLIdentifier.init(_:)), as: query)
+        self.with(name, columns: columns.map { SQLIdentifier($0) as any SQLExpression }, as: query)
     }
 
     /// Specify a subquery to include as a _recursive_ common table expression, for use elsewhere in
@@ -206,7 +206,7 @@ extension SQLCommonTableExpressionBuilder {
     @inlinable
     @discardableResult
     public func with(recursive name: some SQLExpression, columns: [String], as query: some SQLExpression) -> Self {
-        self.with(recursive: name, columns: columns.map(SQLIdentifier.init(_:)), as: query)
+        self.with(recursive: name, columns: columns.map { SQLIdentifier($0) as any SQLExpression }, as: query)
     }
 
     // MARK: - Expression name, expression columns

@@ -97,7 +97,7 @@ extension SQLSubqueryClauseBuilder {
     @inlinable
     @discardableResult
     public func distinct(on column: String, _ columns: String...) -> Self {
-        self.distinct(on: ([column] + columns).map(SQLIdentifier.init(_:)))
+        self.distinct(on: ([column] + columns).map { SQLIdentifier($0) as any SQLExpression })
     }
     
     /// Adds a `DISTINCT` clause to the select statement and explicitly specifies columns to select,
