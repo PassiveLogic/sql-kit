@@ -1,10 +1,15 @@
+// EventLoopFuture is elided on WASI; the `<D: Decodable>` decoding variants are elided in Embedded
+// Swift (no Codable). The raw async `first()`/`all()`/`run(_:)` over `any SQLRow` remain available.
+#if !os(WASI)
 import class NIOCore.EventLoopFuture
+#endif
 
 /// Common definitions for ``SQLQueryBuilder``s which support retrieving result rows.
 public protocol SQLQueryFetcher: SQLQueryBuilder {}
 
 // MARK: - First (EventLoopFuture)
 
+#if !os(WASI)
 extension SQLQueryFetcher {
     /// Returns the named column from the first output row, if any, decoded as a given type.
     ///
@@ -75,9 +80,12 @@ extension SQLQueryFetcher {
     }
 }
 
+#endif  // !os(WASI)
+
 // MARK: - First (async)
 
 extension SQLQueryFetcher {
+    #if !hasFeature(Embedded)
     /// Returns the named column from the first output row, if any, decoded as a given type.
     ///
     /// - Parameters:
@@ -127,6 +135,7 @@ extension SQLQueryFetcher {
     public func first<D: Decodable>(decoding type: D.Type, with decoder: SQLRowDecoder) async throws -> D? {
         try await self.first()?.decode(model: D.self, with: decoder)
     }
+    #endif  // !hasFeature(Embedded)
 
     /// Returns the first output row, if any.
     /// 
@@ -151,6 +160,7 @@ extension SQLQueryFetcher {
 
 // MARK: - All (EventLoopFuture)
 
+#if !os(WASI)
 extension SQLQueryFetcher {
     /// Returns the named column from each output row, if any, decoded as a given type.
     ///
@@ -217,9 +227,12 @@ extension SQLQueryFetcher {
     }
 }
 
+#endif  // !os(WASI)
+
 // MARK: - All (async)
 
 extension SQLQueryFetcher {
+    #if !hasFeature(Embedded)
     /// Returns the named column from each output row, if any, decoded as a given type.
     ///
     /// - Parameters:
@@ -269,6 +282,7 @@ extension SQLQueryFetcher {
     public func all<D: Decodable>(decoding type: D.Type, with decoder: SQLRowDecoder) async throws -> [D] {
         try await self.all().map { try $0.decode(model: D.self, with: decoder) }
     }
+    #endif  // !hasFeature(Embedded)
 
     /// Returns all output rows, if any.
     ///
@@ -289,6 +303,7 @@ extension SQLQueryFetcher {
 
 // MARK: - Run (EventLoopFuture)
 
+#if !os(WASI)
 extension SQLQueryFetcher {
     /// Using a default-configured ``SQLRowDecoder``, call the provided handler closure with the result of decoding
     /// each output row, if any, as a given type.
@@ -355,9 +370,12 @@ extension SQLQueryFetcher {
     }
 }
 
+#endif  // !os(WASI)
+
 // MARK: - Run (async)
 
 extension SQLQueryFetcher {
+    #if !hasFeature(Embedded)
     /// Using a default-configured ``SQLRowDecoder``, call the provided handler closure with the result of decoding
     /// each output row, if any, as a given type.
     ///
@@ -406,6 +424,7 @@ extension SQLQueryFetcher {
     ) async throws {
         try await self.run { row in handler(Result { try row.decode(model: D.self, with: decoder) }) }
     }
+    #endif  // !hasFeature(Embedded)
 
     /// Run the query specified by the builder, calling the provided handler closure with each output row, if any, as
     /// it is received.

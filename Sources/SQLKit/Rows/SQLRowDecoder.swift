@@ -1,3 +1,4 @@
+#if !hasFeature(Embedded)  // EMBEDDED-WASI: Codable engine; Encoder/Decoder unavailable in Embedded Swift
 /// An implementation of `Decoder` designed to decode "models" (or, in general, aggregate `Decodable` types) from
 /// ``SQLRow``s returned from a database query.
 ///
@@ -397,3 +398,5 @@ public struct SQLRowDecoder: Sendable {
         }
     }
 }
+
+#endif  // !hasFeature(Embedded)

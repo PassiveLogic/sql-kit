@@ -1,3 +1,4 @@
+#if !hasFeature(Embedded)  // EMBEDDED-WASI: Codable engine; Encoder/Decoder unavailable in Embedded Swift
 import struct OrderedCollections.OrderedDictionary
 
 /// An implementation of `Encoder` designed to encode "models" (or, in general, aggregate `Encodable` types) into a
@@ -427,3 +428,5 @@ public struct SQLQueryEncoder: Sendable {
         }
     }
 }
+
+#endif  // !hasFeature(Embedded)
