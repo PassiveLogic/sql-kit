@@ -182,7 +182,7 @@ extension SQLDatabase {
     ///
     /// 1. A string containing raw SQL text rendered in the database's dialect, and,
     /// 2. A potentially empty array of values for any bound parameters referenced by the query.
-    public func serialize(_ expression: any SQLExpression) -> (sql: String, binds: [any Encodable & Sendable]) {
+    public func serialize(_ expression: any SQLExpression) -> (sql: String, binds: [any SQLBindable & Sendable]) {
         var serializer = SQLSerializer(database: self)
         expression.serialize(to: &serializer)
         return (serializer.sql, serializer.binds)
