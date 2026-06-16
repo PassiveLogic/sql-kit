@@ -145,7 +145,11 @@ extension SQLQueryFetcher {
     /// - Returns: The first output row, if any.
     @inlinable
     public func first() async throws -> (any SQLRow)? {
+        // `as?` to a different existential is a dynamic cast (unavailable in embedded); skip the
+        // LIMIT-1 optimization there (correctness is unaffected; we just fetch and take the first).
+        #if !hasFeature(Embedded)
         (self as? any SQLPartialResultBuilder)?.limit(1)
+        #endif
         #if swift(>=5.10)
         nonisolated(unsafe) var rows = [any SQLRow]()
         try await self.run { if rows.isEmpty { rows.append($0) } }
