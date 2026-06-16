@@ -1,3 +1,4 @@
+#if !os(WASI) // XCTest & Codable are unavailable on the embedded WASI toolchain.
 import SQLKit
 
 extension SQLBenchmarker {
@@ -44,3 +45,5 @@ fileprivate struct Galaxy: Encodable {
     let id: Int? = nil
     let name: String
 }
+
+#endif // !os(WASI)
