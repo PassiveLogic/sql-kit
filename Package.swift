@@ -1,6 +1,10 @@
 // swift-tools-version:5.10
 import PackageDescription
 
+// SwiftNIO is elided on WASI (normal + Embedded); the WASI path is NIO-free (Swift Concurrency),
+// gated in source with `#if os(WASI)`. `.when(platforms:)` is target-evaluated during cross-compile.
+let nonWASIPlatforms: [Platform] = [.macOS, .macCatalyst, .iOS, .tvOS, .watchOS, .visionOS, .driverKit, .linux, .windows, .android, .openbsd]
+
 let package = Package(
     name: "sql-kit",
     platforms: [
@@ -25,7 +29,7 @@ let package = Package(
             dependencies: [
                 .product(name: "Collections", package: "swift-collections"),
                 .product(name: "Logging", package: "swift-log"),
-                .product(name: "NIOCore", package: "swift-nio"),
+                .product(name: "NIOCore", package: "swift-nio", condition: .when(platforms: nonWASIPlatforms)),
             ],
             swiftSettings: swiftSettings
         ),
