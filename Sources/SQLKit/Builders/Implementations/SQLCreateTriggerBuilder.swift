@@ -52,7 +52,7 @@ public final class SQLCreateTriggerBuilder: SQLQueryBuilder {
     @inlinable
     @discardableResult
     public func columns(_ columns: [String]) -> Self {
-        self.columns(columns.map(SQLIdentifier.init(_:)))
+        self.columns(columns.map { SQLIdentifier($0) as any SQLExpression })
     }
 
     /// Specify the columns to which the trigger applies.

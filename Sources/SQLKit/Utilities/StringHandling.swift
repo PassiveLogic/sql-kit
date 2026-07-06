@@ -117,6 +117,8 @@ extension StringProtocol where Self: RangeReplaceableCollection, Self.Element: E
     }
     
     /// A necessarily inelegant polyfill for conformance to `CodingKeyRepresentable`, due to availability problems.
+    /// `CodingKey` is unavailable in Embedded Swift.
+    #if !hasFeature(Embedded)
     @inlinable
     var codingKeyValue: any CodingKey {
         #if !DEBUG
@@ -126,6 +128,7 @@ extension StringProtocol where Self: RangeReplaceableCollection, Self.Element: E
         #endif
         return SomeCodingKey(stringValue: .init(self))
     }
+    #endif
     
     /// Remove the given optional prefix from the string, if present.
     ///

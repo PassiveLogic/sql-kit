@@ -21,7 +21,7 @@ public struct SQLRaw: SQLExpression {
     /// functionality was never properly implemented and was never used, and is deprecated. Use ``SQLBind`` and/or
     /// ``SQLQueryString`` to achieve the same effect.
     @available(*, deprecated, message: "Binds set in an `SQLRaw` are ignored. Use `SQLBind` instead.")
-    public var binds: [any Encodable & Sendable] = []
+    public var binds: [any SQLBindable & Sendable] = []
     
     /// Create a new raw SQL text expression.
     ///

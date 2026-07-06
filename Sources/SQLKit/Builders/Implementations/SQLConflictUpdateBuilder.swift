@@ -32,6 +32,8 @@ public final class SQLConflictUpdateBuilder: SQLColumnUpdateBuilder, SQLPredicat
         return self
     }
     
+    // Codable model encoding (SQLQueryEncoder) is unavailable in Embedded Swift.
+    #if !hasFeature(Embedded)
     /// Encodes the given `Encodable` value to a sequence of key-value pairs and adds an assignment
     /// for each pair which uses the values each column was given in the original `INSERT` query's
     /// `VALUES` list.
@@ -46,7 +48,7 @@ public final class SQLConflictUpdateBuilder: SQLColumnUpdateBuilder, SQLPredicat
     @inlinable
     @discardableResult
     public func set(
-        excludedContentOf model: some Encodable & Sendable,
+        excludedContentOf model: some SQLBindable & Sendable,
         prefix: String? = nil,
         keyEncodingStrategy: SQLQueryEncoder.KeyEncodingStrategy = .useDefaultKeys,
         nilEncodingStrategy: SQLQueryEncoder.NilEncodingStrategy = .default,
@@ -70,9 +72,10 @@ public final class SQLConflictUpdateBuilder: SQLColumnUpdateBuilder, SQLPredicat
     @inlinable
     @discardableResult
     public func set(
-        excludedContentOf model: some Encodable & Sendable,
+        excludedContentOf model: some SQLBindable & Sendable,
         with encoder: SQLQueryEncoder
     ) throws -> Self {
         try encoder.encode(model).reduce(self) { $0.set(excludedValueOf: $1.0) }
     }
+    #endif  // !hasFeature(Embedded)
 }

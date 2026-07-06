@@ -1,5 +1,8 @@
+// EventLoop/EventLoopFuture are elided on WASI (the WASI build is NIO-free / async).
+#if !hasFeature(Embedded)
 import protocol NIOCore.EventLoop
 import class NIOCore.EventLoopFuture
+#endif
 import struct Logging.Logger
 
 /// The common interface to SQLKit for both drivers and client code.
@@ -62,8 +65,10 @@ public protocol SQLDatabase: Sendable {
     /// assigns loops to connections at point of use, or because the underlying implementation is based on Swift
     /// Concurrency or some other asynchronous execution technology), a single consistent `EventLoop` must be chosen
     /// for the database and returned for this property nonetheless.
+    #if !hasFeature(Embedded)
     var eventLoop: any EventLoop { get }
-    
+    #endif
+
     /// The version number the database reports for itself.
     ///
     /// The version must be provided via a type conforming to the ``SQLDatabaseReportedVersion`` protocol. If the
@@ -113,11 +118,13 @@ public protocol SQLDatabase: Sendable {
     ///   - query: An ``SQLExpression`` representing a complete query to execute.
     ///   - onRow: A closure which is invoked once for each result row returned by the query (if any).
     /// - Returns: An `EventLoopFuture`.
+    #if !hasFeature(Embedded)
     @preconcurrency
     func execute(
         sql query: any SQLExpression,
         _ onRow: @escaping @Sendable (any SQLRow) -> ()
     ) -> EventLoopFuture<Void>
+    #endif
 
     /// Requests that the given generic SQL query be serialized and executed on the database, and that
     /// the `onRow` closure be invoked once for each result row the query returns (if any).
@@ -145,9 +152,13 @@ public protocol SQLDatabase: Sendable {
     /// - Parameter closure: A closure to invoke. The single parameter shall be an implementation of ``SQLDatabase``
     ///   which represents a single "session". Implementations may pass the same database on which this method was
     ///   originally invoked.
+    // Generic method requirements can't be placed in a witness table in Embedded Swift (it would
+    // block `any SQLDatabase`); provided as an extension default below instead.
+    #if !hasFeature(Embedded)
     func withSession<R>(
         _ closure: @escaping @Sendable (any SQLDatabase) async throws -> R
     ) async throws -> R
+    #endif
 }
 
 extension SQLDatabase {
@@ -171,7 +182,7 @@ extension SQLDatabase {
     ///
     /// 1. A string containing raw SQL text rendered in the database's dialect, and,
     /// 2. A potentially empty array of values for any bound parameters referenced by the query.
-    public func serialize(_ expression: any SQLExpression) -> (sql: String, binds: [any Encodable & Sendable]) {
+    public func serialize(_ expression: any SQLExpression) -> (sql: String, binds: [any SQLBindable & Sendable]) {
         var serializer = SQLSerializer(database: self)
         expression.serialize(to: &serializer)
         return (serializer.sql, serializer.binds)
@@ -200,7 +211,9 @@ extension SQLDatabase {
 }
 
 extension SQLDatabase {
-    /// The default implementation for ``execute(sql:_:)-4eg19``.
+    /// The default implementation for ``execute(sql:_:)-4eg19`` (bridges the legacy EventLoopFuture
+    /// API). On WASI there is no EventLoopFuture overload, so conformers implement async execute directly.
+    #if !hasFeature(Embedded)
     @inlinable
     public func execute(
         sql query: any SQLExpression,
@@ -208,7 +221,8 @@ extension SQLDatabase {
     ) async throws {
         try await self.execute(sql: query, onRow).get()
     }
-    
+    #endif
+
     /// The default implementation for ``withSession(_:)-9b68j``.
     @inlinable
     public func withSession<R>(
@@ -227,10 +241,12 @@ private struct CustomLoggerSQLDatabase<D: SQLDatabase>: SQLDatabase {
     // See `SQLDatabase.logger`.
     let logger: Logger
     
+    #if !hasFeature(Embedded)
     // See `SQLDatabase.eventLoop`.
     var eventLoop: any EventLoop {
         self.database.eventLoop
     }
+    #endif
 
     // See `SQLDatabase.version`.
     var version: (any SQLDatabaseReportedVersion)? {
@@ -247,6 +263,7 @@ private struct CustomLoggerSQLDatabase<D: SQLDatabase>: SQLDatabase {
         self.database.queryLogLevel
     }
     
+    #if !hasFeature(Embedded)
     // See `SQLDatabase.execute(sql:_:)`.
     func execute(
         sql query: any SQLExpression,
@@ -254,6 +271,7 @@ private struct CustomLoggerSQLDatabase<D: SQLDatabase>: SQLDatabase {
     ) -> EventLoopFuture<Void> {
         self.database.execute(sql: query, onRow)
     }
+    #endif
 
     // See `SQLDatabase.execute(sql:_:)`.
     func execute(

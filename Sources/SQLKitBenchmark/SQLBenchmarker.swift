@@ -1,3 +1,4 @@
+#if !os(WASI) // XCTest & Codable are unavailable on the embedded WASI toolchain.
 import Logging
 import NIOCore
 public import SQLKit
@@ -79,3 +80,5 @@ func XCTAssertNoThrowAsync<T>(
         XCTAssertNoThrow(try { throw error }(), message(), file: file, line: line)
     }
 }
+
+#endif // !os(WASI)

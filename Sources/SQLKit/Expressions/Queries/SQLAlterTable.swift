@@ -49,7 +49,7 @@ public struct SQLAlterTable: SQLExpression {
         let syntax = serializer.dialect.alterTableSyntax
         
         if !syntax.allowsBatch,
-           [self.addColumns, self.modifyColumns, self.dropColumns, self.addTableConstraints, self.dropTableConstraints].map(\.count).reduce(0, +) > 1
+           [self.addColumns, self.modifyColumns, self.dropColumns, self.addTableConstraints, self.dropTableConstraints].map({ $0.count }).reduce(0, +) > 1
         {
             serializer.database.logger.debug("Database does not support multiple table operation per statement; perform multiple queries with one alteration each instead.")
             // Emit the query anyway so the error will propagate when the database rejects it.
@@ -60,8 +60,10 @@ public struct SQLAlterTable: SQLExpression {
             // Emit the query anyway so the error will propagate when the database rejects it.
         }
 
-        let additions = (self.addColumns  + self.addTableConstraints).map  { (verb: SQLRaw("ADD"),  definition: $0) }
-        let removals  = (self.dropColumns + self.dropTableConstraints).map { (verb: SQLRaw("DROP"), definition: $0) }
+        // Box `verb` to `any SQLExpression` so all three arrays share one tuple type; the implicit
+        // unification during concatenation below is otherwise a dynamic cast (forbidden in embedded).
+        let additions = (self.addColumns  + self.addTableConstraints).map  { (verb: SQLRaw("ADD")  as any SQLExpression, definition: $0) }
+        let removals  = (self.dropColumns + self.dropTableConstraints).map { (verb: SQLRaw("DROP") as any SQLExpression, definition: $0) }
         let modifications = self.modifyColumns.map { (verb: syntax.alterColumnDefinitionClause ?? SQLRaw("__INVALID__"), definition: $0) }
         let alterations = additions + removals + modifications
 

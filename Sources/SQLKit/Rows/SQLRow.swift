@@ -29,9 +29,15 @@ public protocol SQLRow: Sendable {
     /// does not exist in the row.
     ///
     /// Corresponds to `KeyedDecodingContainer.decode(_:forKey:)`.
+    ///
+    /// Unavailable in Embedded Swift: it is a generic method requirement (which can't be placed in a
+    /// witness table, so it would block `any SQLRow`) and relies on `Decodable`.
+    #if !hasFeature(Embedded)
     func decode<D: Decodable>(column: String, as: D.Type) throws -> D
+    #endif
 }
 
+#if !hasFeature(Embedded)
 extension SQLRow {
     /// Decode an entire `Decodable` "model" type at once, optionally applying a prefix and/or
     /// ``SQLRowDecoder/KeyDecodingStrategy-swift.enum`` to the type's coding keys.
@@ -88,3 +94,4 @@ extension SQLRow {
         try self.decode(column: column, as: D.self)
     }
 }
+#endif  // !hasFeature(Embedded)
