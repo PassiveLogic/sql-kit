@@ -23,7 +23,7 @@ let package = Package(
 
         // TODO: 7-sm-wasm: use updated version
         // .package(url: "https://github.com/apple/swift-nio.git", from: "2.65.0"),
-        .package(url: "https://github.com/PassiveLogic/swift-nio.git", branch: "feat/khasmPAL-2026"),
+        .package(url: "https://github.com/PassiveLogic/swift-nio.git", branch: "feat/khasm-PAL-2026-v3"),
     ],
     targets: [
         .target(
