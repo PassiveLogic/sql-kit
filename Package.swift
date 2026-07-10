@@ -31,7 +31,9 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/apple/swift-collections.git", from: "1.1.0"),
-        .package(url: "https://github.com/apple/swift-log.git", from: "1.5.4"),
+        // Local embedded-ported swift-log clone (see /Users/scottm/git/c34/EMBEDDED_WASM_NOTES.md);
+        // the khasm graph already resolves the swift-log identity to this clone via QuantumInterface.
+        .package(path: "../swift-log"),
         .package(url: "https://github.com/apple/swift-nio.git", from: "2.84.0"),
     ],
     targets: [
