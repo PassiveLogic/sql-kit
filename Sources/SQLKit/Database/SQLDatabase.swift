@@ -1,5 +1,5 @@
-// EventLoop/EventLoopFuture are elided on WASI (the WASI build is NIO-free / async).
-#if !hasFeature(Embedded)
+// EventLoop/EventLoopFuture are elided on the NativeConcurrency (NIO-free) build.
+#if !NativeConcurrency
 import protocol NIOCore.EventLoop
 import class NIOCore.EventLoopFuture
 #endif
@@ -65,7 +65,7 @@ public protocol SQLDatabase: Sendable {
     /// assigns loops to connections at point of use, or because the underlying implementation is based on Swift
     /// Concurrency or some other asynchronous execution technology), a single consistent `EventLoop` must be chosen
     /// for the database and returned for this property nonetheless.
-    #if !hasFeature(Embedded)
+    #if !NativeConcurrency
     var eventLoop: any EventLoop { get }
     #endif
 
@@ -118,7 +118,7 @@ public protocol SQLDatabase: Sendable {
     ///   - query: An ``SQLExpression`` representing a complete query to execute.
     ///   - onRow: A closure which is invoked once for each result row returned by the query (if any).
     /// - Returns: An `EventLoopFuture`.
-    #if !hasFeature(Embedded)
+    #if !NativeConcurrency
     @preconcurrency
     func execute(
         sql query: any SQLExpression,
@@ -212,8 +212,9 @@ extension SQLDatabase {
 
 extension SQLDatabase {
     /// The default implementation for ``execute(sql:_:)-4eg19`` (bridges the legacy EventLoopFuture
-    /// API). On WASI there is no EventLoopFuture overload, so conformers implement async execute directly.
-    #if !hasFeature(Embedded)
+    /// API). On the NativeConcurrency build there is no EventLoopFuture overload, so conformers
+    /// implement async execute directly.
+    #if !NativeConcurrency
     @inlinable
     public func execute(
         sql query: any SQLExpression,
@@ -241,7 +242,7 @@ private struct CustomLoggerSQLDatabase<D: SQLDatabase>: SQLDatabase {
     // See `SQLDatabase.logger`.
     let logger: Logger
     
-    #if !hasFeature(Embedded)
+    #if !NativeConcurrency
     // See `SQLDatabase.eventLoop`.
     var eventLoop: any EventLoop {
         self.database.eventLoop
@@ -263,7 +264,7 @@ private struct CustomLoggerSQLDatabase<D: SQLDatabase>: SQLDatabase {
         self.database.queryLogLevel
     }
     
-    #if !hasFeature(Embedded)
+    #if !NativeConcurrency
     // See `SQLDatabase.execute(sql:_:)`.
     func execute(
         sql query: any SQLExpression,

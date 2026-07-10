@@ -1,5 +1,5 @@
-// EventLoopFuture is elided on WASI (the WASI build is NIO-free / async).
-#if !hasFeature(Embedded)
+// EventLoopFuture is elided on the NativeConcurrency (NIO-free) build.
+#if !NativeConcurrency
 import class NIOCore.EventLoopFuture
 #endif
 
@@ -17,7 +17,7 @@ public protocol SQLQueryBuilder: AnyObject {
     ///
     /// Although it is a protocol requirement for historical reasons, this is considered a legacy interface
     /// thanks to its reliance on `EventLoopFuture`. Users should call ``run()-3tldd`` whenever possible.
-    #if !hasFeature(Embedded)
+    #if !NativeConcurrency
     func run() -> EventLoopFuture<Void>
     #endif
 
@@ -30,7 +30,7 @@ extension SQLQueryBuilder {
     /// Execute the query associated with the builder on the builder's database, ignoring any results.
     ///
     /// See ``SQLQueryFetcher`` for methods which retrieve results from a query.
-    #if !hasFeature(Embedded)
+    #if !NativeConcurrency
     @inlinable
     public func run() -> EventLoopFuture<Void> {
         self.database.execute(sql: self.query) { _ in }

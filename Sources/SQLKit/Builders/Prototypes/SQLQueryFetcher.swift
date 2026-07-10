@@ -1,6 +1,7 @@
-// EventLoopFuture is elided on WASI; the `<D: Decodable>` decoding variants are elided in Embedded
-// Swift (no Codable). The raw async `first()`/`all()`/`run(_:)` over `any SQLRow` remain available.
-#if !hasFeature(Embedded)
+// EventLoopFuture is elided on the NativeConcurrency (NIO-free) build; the `<D: Decodable>`
+// decoding variants are elided in Embedded Swift (no Codable). The raw async
+// `first()`/`all()`/`run(_:)` over `any SQLRow` remain available everywhere.
+#if !NativeConcurrency
 import class NIOCore.EventLoopFuture
 #endif
 
@@ -9,7 +10,7 @@ public protocol SQLQueryFetcher: SQLQueryBuilder {}
 
 // MARK: - First (EventLoopFuture)
 
-#if !hasFeature(Embedded)
+#if !NativeConcurrency
 extension SQLQueryFetcher {
     /// Returns the named column from the first output row, if any, decoded as a given type.
     ///
@@ -75,7 +76,7 @@ extension SQLQueryFetcher {
     }
 }
 
-#endif  // !hasFeature(Embedded)
+#endif  // !NativeConcurrency
 
 // MARK: - First (async)
 
@@ -153,7 +154,7 @@ extension SQLQueryFetcher {
 
 // MARK: - All (EventLoopFuture)
 
-#if !hasFeature(Embedded)
+#if !NativeConcurrency
 extension SQLQueryFetcher {
     /// Returns the named column from each output row, if any, decoded as a given type.
     ///
@@ -215,7 +216,7 @@ extension SQLQueryFetcher {
     }
 }
 
-#endif  // !hasFeature(Embedded)
+#endif  // !NativeConcurrency
 
 // MARK: - All (async)
 
@@ -285,7 +286,7 @@ extension SQLQueryFetcher {
 
 // MARK: - Run (EventLoopFuture)
 
-#if !hasFeature(Embedded)
+#if !NativeConcurrency
 extension SQLQueryFetcher {
     /// Using a default-configured ``SQLRowDecoder``, call the provided handler closure with the result of decoding
     /// each output row, if any, as a given type.
@@ -352,7 +353,7 @@ extension SQLQueryFetcher {
     }
 }
 
-#endif  // !hasFeature(Embedded)
+#endif  // !NativeConcurrency
 
 // MARK: - Run (async)
 
