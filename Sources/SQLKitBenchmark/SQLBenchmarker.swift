@@ -1,5 +1,8 @@
+#if !os(WASI) // XCTest & Codable are unavailable on the embedded WASI toolchain.
 import Logging
+#if !NativeConcurrency
 import NIOCore
+#endif
 public import SQLKit
 import XCTest
 
@@ -21,6 +24,8 @@ public final class SQLBenchmarker: Sendable {
         }
     }
     
+    // The deprecated EventLoopFuture bridges are elided on the NativeConcurrency (NIO-free) build.
+    #if !NativeConcurrency
     @available(*, deprecated, renamed: "runAllTests()", message: "Use `runAllTests()` instead.")
     public func testAll() throws {
         try database.eventLoop.makeFutureWithTask { try await self.runAllTests() }.wait()
@@ -30,6 +35,7 @@ public final class SQLBenchmarker: Sendable {
     public func run() throws {
         try self.testAll()
     }
+    #endif
     
     func runTest(
         _ name: String = #function,
@@ -79,3 +85,5 @@ func XCTAssertNoThrowAsync<T>(
         XCTAssertNoThrow(try { throw error }(), message(), file: file, line: line)
     }
 }
+
+#endif // !os(WASI)

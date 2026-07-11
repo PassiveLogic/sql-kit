@@ -5,7 +5,7 @@ public struct SQLSerializer: Sendable {
     public var sql: String
     
     /// The list of bound parameter values (if any).
-    public var binds: [any Encodable & Sendable]
+    public var binds: [any SQLBindable & Sendable]
     
     /// The database for this serializer.
     public let database: any SQLDatabase
@@ -30,7 +30,7 @@ public struct SQLSerializer: Sendable {
     ///
     /// - Parameter encodable: The value to bind.
     @inlinable
-    public mutating func write(bind encodable: any Encodable & Sendable) {
+    public mutating func write(bind encodable: any SQLBindable & Sendable) {
         self.binds.append(encodable)
         self.dialect.bindPlaceholder(at: self.binds.count)
             .serialize(to: &self)

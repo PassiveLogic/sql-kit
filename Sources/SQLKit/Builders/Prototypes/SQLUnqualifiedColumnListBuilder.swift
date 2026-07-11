@@ -36,7 +36,7 @@ extension SQLUnqualifiedColumnListBuilder {
     @inlinable
     @discardableResult
     public func columns(_ columns: [String]) -> Self {
-        self.columns(columns.map { SQLColumn($0) })
+        self.columns(columns.map { SQLColumn($0) as any SQLExpression })
     }
 
     /// Specify mutiple columns to be included in the list of columns for the query.

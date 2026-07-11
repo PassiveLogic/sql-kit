@@ -1,3 +1,4 @@
+#if !hasFeature(Embedded)  // EMBEDDED-WASI: Codable engine; Encoder/Decoder unavailable in Embedded Swift
 /// Errors raised by ``SQLRowDecoder`` and ``SQLQueryEncoder``.
 @_spi(CodableUtilities)
 public enum SQLCodingError: Error, CustomStringConvertible, Sendable {
@@ -237,3 +238,5 @@ extension FakeSendableCodable: CustomDebugStringConvertible where T: CustomDebug
         self.value.debugDescription
     }
 }
+
+#endif  // !hasFeature(Embedded)

@@ -1,3 +1,4 @@
+#if !os(WASI) // XCTest & Codable are unavailable on the embedded WASI toolchain.
 import SQLKit
 
 extension SQLBenchmarker {
@@ -116,3 +117,5 @@ private enum PlanetType: String, Codable, SQLExpression {
             .serialize(to: &serializer)
     }
 }
+
+#endif // !os(WASI)

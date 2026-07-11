@@ -1,3 +1,4 @@
+#if !os(WASI) // XCTest & Codable are unavailable on the embedded WASI toolchain.
 import SQLKit
 import XCTest
 
@@ -45,3 +46,5 @@ extension SQLBenchmarker {
         }
     }
 }
+
+#endif // !os(WASI)

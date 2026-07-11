@@ -1,10 +1,16 @@
+// EventLoopFuture is elided on the NativeConcurrency (NIO-free) build; the `<D: Decodable>`
+// decoding variants are elided in Embedded Swift (no Codable). The raw async
+// `first()`/`all()`/`run(_:)` over `any SQLRow` remain available everywhere.
+#if !NativeConcurrency
 import class NIOCore.EventLoopFuture
+#endif
 
 /// Common definitions for ``SQLQueryBuilder``s which support retrieving result rows.
 public protocol SQLQueryFetcher: SQLQueryBuilder {}
 
 // MARK: - First (EventLoopFuture)
 
+#if !NativeConcurrency
 extension SQLQueryFetcher {
     /// Returns the named column from the first output row, if any, decoded as a given type.
     ///
@@ -70,9 +76,12 @@ extension SQLQueryFetcher {
     }
 }
 
+#endif  // !NativeConcurrency
+
 // MARK: - First (async)
 
 extension SQLQueryFetcher {
+    #if !hasFeature(Embedded)
     /// Returns the named column from the first output row, if any, decoded as a given type.
     ///
     /// - Parameters:
@@ -122,6 +131,7 @@ extension SQLQueryFetcher {
     public func first<D: Decodable>(decoding type: D.Type, with decoder: SQLRowDecoder) async throws -> D? {
         try await self.first()?.decode(model: D.self, with: decoder)
     }
+    #endif  // !hasFeature(Embedded)
 
     /// Returns the first output row, if any.
     /// 
@@ -131,7 +141,11 @@ extension SQLQueryFetcher {
     /// - Returns: The first output row, if any.
     @inlinable
     public func first() async throws -> (any SQLRow)? {
+        // `as?` to a different existential is a dynamic cast (unavailable in embedded); skip the
+        // LIMIT-1 optimization there (correctness is unaffected; we just fetch and take the first).
+        #if !hasFeature(Embedded)
         (self as? any SQLPartialResultBuilder)?.limit(1)
+        #endif
         nonisolated(unsafe) var rows = [any SQLRow]()
         try await self.run { if rows.isEmpty { rows.append($0) } }
         return rows.first
@@ -140,6 +154,7 @@ extension SQLQueryFetcher {
 
 // MARK: - All (EventLoopFuture)
 
+#if !NativeConcurrency
 extension SQLQueryFetcher {
     /// Returns the named column from each output row, if any, decoded as a given type.
     ///
@@ -201,9 +216,12 @@ extension SQLQueryFetcher {
     }
 }
 
+#endif  // !NativeConcurrency
+
 // MARK: - All (async)
 
 extension SQLQueryFetcher {
+    #if !hasFeature(Embedded)
     /// Returns the named column from each output row, if any, decoded as a given type.
     ///
     /// - Parameters:
@@ -253,6 +271,7 @@ extension SQLQueryFetcher {
     public func all<D: Decodable>(decoding type: D.Type, with decoder: SQLRowDecoder) async throws -> [D] {
         try await self.all().map { try $0.decode(model: D.self, with: decoder) }
     }
+    #endif  // !hasFeature(Embedded)
 
     /// Returns all output rows, if any.
     ///
@@ -267,6 +286,7 @@ extension SQLQueryFetcher {
 
 // MARK: - Run (EventLoopFuture)
 
+#if !NativeConcurrency
 extension SQLQueryFetcher {
     /// Using a default-configured ``SQLRowDecoder``, call the provided handler closure with the result of decoding
     /// each output row, if any, as a given type.
@@ -333,9 +353,12 @@ extension SQLQueryFetcher {
     }
 }
 
+#endif  // !NativeConcurrency
+
 // MARK: - Run (async)
 
 extension SQLQueryFetcher {
+    #if !hasFeature(Embedded)
     /// Using a default-configured ``SQLRowDecoder``, call the provided handler closure with the result of decoding
     /// each output row, if any, as a given type.
     ///
@@ -384,6 +407,7 @@ extension SQLQueryFetcher {
     ) async throws {
         try await self.run { row in handler(Result { try row.decode(model: D.self, with: decoder) }) }
     }
+    #endif  // !hasFeature(Embedded)
 
     /// Run the query specified by the builder, calling the provided handler closure with each output row, if any, as
     /// it is received.

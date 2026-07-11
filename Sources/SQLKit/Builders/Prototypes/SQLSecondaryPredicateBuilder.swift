@@ -23,7 +23,7 @@ extension SQLSecondaryPredicateBuilder {
     ///     SELECT * FROM "planets" HAVING "name" = $0 ["Earth"]
     @inlinable
     @discardableResult
-    public func having(_ lhs: String, _ op: SQLBinaryOperator, _ rhs: some Encodable & Sendable) -> Self {
+    public func having(_ lhs: String, _ op: SQLBinaryOperator, _ rhs: some SQLBindable & Sendable) -> Self {
         self.having(SQLColumn(lhs), op, SQLBind(rhs))
     }
 
@@ -36,8 +36,8 @@ extension SQLSecondaryPredicateBuilder {
     ///     SELECT * FROM "planets" HAVING "name" IN ($0, $1) ["Earth", "Mars"]
     @inlinable
     @discardableResult
-    public func having(_ lhs: String, _ op: SQLBinaryOperator, _ rhs: [some Encodable & Sendable]) -> Self {
-        self.having(SQLColumn(lhs), op, SQLBind.group(rhs))
+    public func having(_ lhs: String, _ op: SQLBinaryOperator, _ rhs: [some SQLBindable & Sendable]) -> Self {
+        self.having(SQLColumn(lhs), op, SQLBind.group(rhs.map { $0 as any SQLBindable & Sendable }))
     }
 
     /// Adds a column to encodable comparison to this builder's `HAVING` clause by `AND`ing.
@@ -49,7 +49,7 @@ extension SQLSecondaryPredicateBuilder {
     ///     SELECT * FROM "planets" HAVING "name" = $0 ["Earth"]
     @inlinable
     @discardableResult
-    public func having(_ lhs: SQLIdentifier, _ op: SQLBinaryOperator, _ rhs: some Encodable & Sendable) -> Self {
+    public func having(_ lhs: SQLIdentifier, _ op: SQLBinaryOperator, _ rhs: some SQLBindable & Sendable) -> Self {
         self.having(SQLColumn(lhs), op, SQLBind(rhs))
     }
 
@@ -62,8 +62,8 @@ extension SQLSecondaryPredicateBuilder {
     ///     SELECT * FROM "planets" HAVING "name" IN ($0, $1) ["Earth", "Mars"]
     @inlinable
     @discardableResult
-    public func having(_ lhs: SQLIdentifier, _ op: SQLBinaryOperator, _ rhs: [some Encodable & Sendable]) -> Self {
-        self.having(SQLColumn(lhs), op, SQLBind.group(rhs))
+    public func having(_ lhs: SQLIdentifier, _ op: SQLBinaryOperator, _ rhs: [some SQLBindable & Sendable]) -> Self {
+        self.having(SQLColumn(lhs), op, SQLBind.group(rhs.map { $0 as any SQLBindable & Sendable }))
     }
 
     // MARK: - Column/column comparison
@@ -148,29 +148,29 @@ extension SQLSecondaryPredicateBuilder {
     /// Adds a column to encodable comparison to this builder's `HAVING` clause by `OR`ing.
     @inlinable
     @discardableResult
-    public func orHaving(_ lhs: String, _ op: SQLBinaryOperator, _ rhs: some Encodable & Sendable) -> Self {
+    public func orHaving(_ lhs: String, _ op: SQLBinaryOperator, _ rhs: some SQLBindable & Sendable) -> Self {
         self.orHaving(SQLColumn(lhs), op, SQLBind(rhs))
     }
 
     /// Adds a column to encodable array comparison to this builder's `HAVING` clause by `OR`ing.
     @inlinable
     @discardableResult
-    public func orHaving(_ lhs: String, _ op: SQLBinaryOperator, _ rhs: [some Encodable & Sendable]) -> Self {
-        self.orHaving(SQLColumn(lhs), op, SQLBind.group(rhs))
+    public func orHaving(_ lhs: String, _ op: SQLBinaryOperator, _ rhs: [some SQLBindable & Sendable]) -> Self {
+        self.orHaving(SQLColumn(lhs), op, SQLBind.group(rhs.map { $0 as any SQLBindable & Sendable }))
     }
 
     /// Adds a column to encodable comparison to this builder's `HAVING` clause by `OR`ing.
     @inlinable
     @discardableResult
-    public func orHaving(_ lhs: SQLIdentifier, _ op: SQLBinaryOperator, _ rhs: some Encodable & Sendable) -> Self {
+    public func orHaving(_ lhs: SQLIdentifier, _ op: SQLBinaryOperator, _ rhs: some SQLBindable & Sendable) -> Self {
         self.orHaving(SQLColumn(lhs), op, SQLBind(rhs))
     }
 
     /// Adds a column to encodable array comparison to this builder's `HAVING` clause by `OR`ing.
     @inlinable
     @discardableResult
-    public func orHaving(_ lhs: SQLIdentifier, _ op: SQLBinaryOperator, _ rhs: [some Encodable & Sendable]) -> Self {
-        self.orHaving(SQLColumn(lhs), op, SQLBind.group(rhs))
+    public func orHaving(_ lhs: SQLIdentifier, _ op: SQLBinaryOperator, _ rhs: [some SQLBindable & Sendable]) -> Self {
+        self.orHaving(SQLColumn(lhs), op, SQLBind.group(rhs.map { $0 as any SQLBindable & Sendable }))
     }
 
     // MARK: - Column/column comparison

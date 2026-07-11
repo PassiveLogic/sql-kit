@@ -1,3 +1,4 @@
+#if !hasFeature(Embedded)  // EMBEDDED-WASI: CodingKey unavailable in Embedded Swift
 /// A straightforward implementation of `CodingKey`, used to represent arbitrary keys.
 ///
 /// This type is a simple helper, compensating for the inability to depend on the presence
@@ -30,3 +31,5 @@ public struct SomeCodingKey: CodingKey, Hashable, Sendable {
         self.intValue = intValue
     }
 }
+
+#endif  // !hasFeature(Embedded)

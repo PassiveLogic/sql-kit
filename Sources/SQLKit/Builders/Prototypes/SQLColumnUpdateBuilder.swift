@@ -7,6 +7,8 @@ public protocol SQLColumnUpdateBuilder: AnyObject {
 }
 
 extension SQLColumnUpdateBuilder {
+    // Codable model encoding (SQLQueryEncoder) is unavailable in Embedded Swift.
+    #if !hasFeature(Embedded)
     /// Using a default-configured ``SQLQueryEncoder``, transform the provided model into a series of key/value
     /// pairs and add an assignment for each pair.
     ///
@@ -15,7 +17,7 @@ extension SQLColumnUpdateBuilder {
     /// - Parameter model: An `Encodable` value whose keys and values will form a series of column assignments.
     @inlinable
     @discardableResult
-    public func set(model: some Encodable & Sendable) throws -> Self {
+    public func set(model: some SQLBindable & Sendable) throws -> Self {
         try self.set(model: model, with: .init())
     }
 
@@ -33,7 +35,7 @@ extension SQLColumnUpdateBuilder {
     @inlinable
     @discardableResult
     public func set(
-        model: some Encodable & Sendable,
+        model: some SQLBindable & Sendable,
         prefix: String? = nil,
         keyEncodingStrategy: SQLQueryEncoder.KeyEncodingStrategy = .useDefaultKeys,
         nilEncodingStrategy: SQLQueryEncoder.NilEncodingStrategy = .default,
@@ -61,11 +63,12 @@ extension SQLColumnUpdateBuilder {
     @inlinable
     @discardableResult
     public func set(
-        model: some Encodable & Sendable,
+        model: some SQLBindable & Sendable,
         with encoder: SQLQueryEncoder
     ) throws -> Self {
         try encoder.encode(model).reduce(self) { $0.set(SQLColumn($1.0), to: $1.1) }
     }
+    #endif  // !hasFeature(Embedded)
 
     /// Add an assignment setting the named column to the provided `Encodable` value.
     ///
@@ -76,7 +79,7 @@ extension SQLColumnUpdateBuilder {
     ///   - bind: The value to assign to the named column.
     @inlinable
     @discardableResult
-    public func set(_ column: String, to bind: any Encodable & Sendable) -> Self {
+    public func set(_ column: String, to bind: any SQLBindable & Sendable) -> Self {
         self.set(SQLColumn(column), to: SQLBind(bind))
     }
     
@@ -102,7 +105,7 @@ extension SQLColumnUpdateBuilder {
     ///   - bind: The value to assign to the given column.
     @inlinable
     @discardableResult
-    public func set(_ column: any SQLExpression, to bind: any Encodable & Sendable) -> Self {
+    public func set(_ column: any SQLExpression, to bind: any SQLBindable & Sendable) -> Self {
         self.set(column, to: SQLBind(bind))
     }
     

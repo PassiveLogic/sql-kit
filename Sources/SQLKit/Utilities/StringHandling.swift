@@ -20,12 +20,12 @@ extension StringProtocol where Self: RangeReplaceableCollection, Self.Element: E
     }
 
     /// Provides a version of `StringProtocol.replacing(_:with:)` which is guaranteed to be available.
-    #if !DEBUG && !canImport(Darwin)
+    #if !DEBUG && !canImport(Darwin) && !hasFeature(Embedded)
     @inline(__always)
     #endif
     @inlinable
     func sqlkit_replacing(_ search: some StringProtocol, with replacement: some StringProtocol) -> String {
-        #if DEBUG || canImport(Darwin)
+        #if DEBUG || canImport(Darwin) || hasFeature(Embedded)
         // On Apple platforms, this hand-rolled implementation is MUCH faster (10x or more) than the stdlib version, for some reason.
         // We also want to use this implementation in debug builds, so that the tests test it rather than the stdlib.
         guard !self.isEmpty, !search.isEmpty, self.count >= search.count else { return .init(self) }
@@ -117,6 +117,8 @@ extension StringProtocol where Self: RangeReplaceableCollection, Self.Element: E
     }
     
     /// A necessarily inelegant polyfill for conformance to `CodingKeyRepresentable`, due to availability problems.
+    /// `CodingKey` is unavailable in Embedded Swift.
+    #if !hasFeature(Embedded)
     @inlinable
     var codingKeyValue: any CodingKey {
         #if !DEBUG
@@ -126,6 +128,7 @@ extension StringProtocol where Self: RangeReplaceableCollection, Self.Element: E
         #endif
         return SomeCodingKey(stringValue: .init(self))
     }
+    #endif
     
     /// Remove the given optional prefix from the string, if present.
     ///
@@ -133,7 +136,9 @@ extension StringProtocol where Self: RangeReplaceableCollection, Self.Element: E
     /// - Returns: The string with the prefix removed, if it exists. The string unmodified if not,
     ///   or if `prefix` is `nil`.
     func drop(prefix: (some StringProtocol)?) -> Self.SubSequence {
-        #if !DEBUG
+        // Embedded: `trimmingPrefix(_:)` is not available in the Embedded stdlib;
+        // fall through to the manual implementation below.
+        #if !DEBUG && !hasFeature(Embedded)
         if #available(macOS 13.0, iOS 16.0, watchOS 9.0, tvOS 16.0, *) {
             return prefix.map(self.trimmingPrefix(_:)) ?? self[...]
         }
