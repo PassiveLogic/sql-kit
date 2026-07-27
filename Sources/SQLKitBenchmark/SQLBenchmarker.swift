@@ -1,3 +1,4 @@
+#if !hasFeature(Embedded) // XCTest and Codable are both unavailable in Embedded Swift.
 import Logging
 #if canImport(NIOCore)
 import NIOCore
@@ -84,3 +85,5 @@ func XCTAssertNoThrowAsync<T>(
         XCTAssertNoThrow(try { throw error }(), message(), file: file, line: line)
     }
 }
+
+#endif // !hasFeature(Embedded)

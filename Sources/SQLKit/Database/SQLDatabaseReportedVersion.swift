@@ -88,12 +88,22 @@ extension SQLDatabaseReportedVersion {
     /// Default implementation of ``isEqual(to:)-6ybn8``.
     @inlinable
     public func isEqual(to otherVersion: any SQLDatabaseReportedVersion) -> Bool {
+        // `as? Self` is a cast to a generic type, unavailable in Embedded Swift; compare the string
+        // representations directly there (the same-type guard is relaxed).
+        #if hasFeature(Embedded)
+        otherVersion.stringValue == self.stringValue
+        #else
         (otherVersion as? Self).map { $0.stringValue == self.stringValue } ?? false
+        #endif
     }
 
     /// Default implementation of ``isOlder(than:)-1o58v``.
     @inlinable
     public func isOlder(than otherVersion: any SQLDatabaseReportedVersion) -> Bool {
+        #if hasFeature(Embedded)
+        self.stringValue.lexicographicallyPrecedes(otherVersion.stringValue)
+        #else
         (otherVersion as? Self).map { self.stringValue.lexicographicallyPrecedes($0.stringValue) } ?? false
+        #endif
     }
 }

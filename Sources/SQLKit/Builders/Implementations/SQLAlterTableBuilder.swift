@@ -45,7 +45,9 @@ public final class SQLAlterTableBuilder: SQLQueryBuilder {
     @inlinable
     @discardableResult
     public func column(_ column: String, type dataType: SQLDataType, _ constraints: [SQLColumnConstraintAlgorithm]) -> Self {
-        self.column(SQLIdentifier(column), type: dataType, constraints)
+        // Box each element explicitly: the implicit `[Concrete]` to `[any SQLExpression]` array
+        // conversion is a dynamic cast, which Embedded Swift forbids.
+        self.column(SQLIdentifier(column), type: dataType, constraints.map { $0 as any SQLExpression })
     }
     
     /// Add a new column to the table.
@@ -81,7 +83,7 @@ public final class SQLAlterTableBuilder: SQLQueryBuilder {
     @inlinable
     @discardableResult
     public func modifyColumn(_ column: String, type dataType: SQLDataType, _ constraints: [SQLColumnConstraintAlgorithm]) -> Self {
-        self.modifyColumn(SQLIdentifier(column), type: dataType, constraints)
+        self.modifyColumn(SQLIdentifier(column), type: dataType, constraints.map { $0 as any SQLExpression })
     }
     
     /// Change an existing column's type and constraints.

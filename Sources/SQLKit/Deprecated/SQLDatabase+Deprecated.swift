@@ -9,7 +9,13 @@ extension SQLDatabaseReportedVersion {
     @inlinable
     @available(*, deprecated, renamed: "<=", message: "Use the `<=` operator instead.")
     public func isNotNewer(than otherVersion: any SQLDatabaseReportedVersion) -> Bool {
+        // `as? Self` is a cast to a generic type (unavailable in Embedded Swift); call the
+        // existential-based comparisons directly there.
+        #if hasFeature(Embedded)
+        self.isEqual(to: otherVersion) || self.isOlder(than: otherVersion)
+        #else
         (otherVersion as? Self).map { self.isEqual(to: $0) || self.isOlder(than: $0) } ?? false
+        #endif
     }
     
     /// Check whether the current version (i.e. `self`) is newer than the one given.
@@ -22,7 +28,11 @@ extension SQLDatabaseReportedVersion {
     @inlinable
     @available(*, deprecated, renamed: ">", message: "Use the `>` operator instead.")
     public func isNewer(than otherVersion: any SQLDatabaseReportedVersion) -> Bool {
+        #if hasFeature(Embedded)
+        !self.isNotNewer(than: otherVersion)
+        #else
         (otherVersion as? Self).map { !self.isNotNewer(than: $0) } ?? false
+        #endif
     }
 
     /// Check whether the current version (i.e. `self`) is newer than or equal to the one given.
@@ -35,6 +45,10 @@ extension SQLDatabaseReportedVersion {
     @inlinable
     @available(*, deprecated, renamed: ">=", message: "Use the `>=` operator instead.")
     public func isNotOlder(than otherVersion: any SQLDatabaseReportedVersion) -> Bool {
+        #if hasFeature(Embedded)
+        !self.isOlder(than: otherVersion)
+        #else
         (otherVersion as? Self).map { !self.isOlder(than: $0) } ?? false
+        #endif
     }
 }

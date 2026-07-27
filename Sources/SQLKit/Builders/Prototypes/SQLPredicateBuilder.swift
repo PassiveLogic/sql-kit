@@ -23,7 +23,7 @@ extension SQLPredicateBuilder {
     ///     SELECT * FROM "planets" WHERE "name" = $0 ["Earth"]
     @inlinable
     @discardableResult
-    public func `where`(_ lhs: String, _ op: SQLBinaryOperator, _ rhs: some Encodable & Sendable) -> Self {
+    public func `where`(_ lhs: String, _ op: SQLBinaryOperator, _ rhs: some SQLBindable & Sendable) -> Self {
         self.where(SQLColumn(lhs), op, SQLBind(rhs))
     }
 
@@ -36,8 +36,8 @@ extension SQLPredicateBuilder {
     ///     SELECT * FROM "planets" WHERE "name" IN ($0, $1) ["Earth", "Mars"]
     @inlinable
     @discardableResult
-    public func `where`(_ lhs: String, _ op: SQLBinaryOperator, _ rhs: [some Encodable & Sendable]) -> Self {
-        self.where(SQLColumn(lhs), op, SQLBind.group(rhs))
+    public func `where`(_ lhs: String, _ op: SQLBinaryOperator, _ rhs: [some SQLBindable & Sendable]) -> Self {
+        self.where(SQLColumn(lhs), op, SQLBind.group(rhs.map { $0 as any SQLBindable & Sendable }))
     }
 
     /// Adds a column to encodable comparison to this builder's `WHERE` clause by `AND`ing.
@@ -49,7 +49,7 @@ extension SQLPredicateBuilder {
     ///     SELECT * FROM "planets" WHERE "name" = $0 ["Earth"]
     @inlinable
     @discardableResult
-    public func `where`(_ lhs: SQLIdentifier, _ op: SQLBinaryOperator, _ rhs: some Encodable & Sendable) -> Self {
+    public func `where`(_ lhs: SQLIdentifier, _ op: SQLBinaryOperator, _ rhs: some SQLBindable & Sendable) -> Self {
         self.where(SQLColumn(lhs), op, SQLBind(rhs))
     }
 
@@ -62,8 +62,8 @@ extension SQLPredicateBuilder {
     ///     SELECT * FROM "planets" WHERE "name" IN ($0, $1) ["Earth", "Mars"]
     @inlinable
     @discardableResult
-    public func `where`(_ lhs: SQLIdentifier, _ op: SQLBinaryOperator, _ rhs: [some Encodable & Sendable]) -> Self {
-        self.where(SQLColumn(lhs), op, SQLBind.group(rhs))
+    public func `where`(_ lhs: SQLIdentifier, _ op: SQLBinaryOperator, _ rhs: [some SQLBindable & Sendable]) -> Self {
+        self.where(SQLColumn(lhs), op, SQLBind.group(rhs.map { $0 as any SQLBindable & Sendable }))
     }
 
     // MARK: - Column/column comparison
@@ -154,7 +154,7 @@ extension SQLPredicateBuilder {
     ///     SELECT * FROM "planets" WHERE "name" = $0 ["Earth"]
     @inlinable
     @discardableResult
-    public func orWhere(_ lhs: String, _ op: SQLBinaryOperator, _ rhs: some Encodable & Sendable) -> Self {
+    public func orWhere(_ lhs: String, _ op: SQLBinaryOperator, _ rhs: some SQLBindable & Sendable) -> Self {
         self.orWhere(SQLColumn(lhs), op, SQLBind(rhs))
     }
 
@@ -167,22 +167,22 @@ extension SQLPredicateBuilder {
     ///     SELECT * FROM "planets" WHERE "name" IN ($0, $1) ["Earth", "Mars"]
     @inlinable
     @discardableResult
-    public func orWhere(_ lhs: String, _ op: SQLBinaryOperator, _ rhs: [some Encodable & Sendable]) -> Self {
-        self.orWhere(SQLColumn(lhs), op, SQLBind.group(rhs))
+    public func orWhere(_ lhs: String, _ op: SQLBinaryOperator, _ rhs: [some SQLBindable & Sendable]) -> Self {
+        self.orWhere(SQLColumn(lhs), op, SQLBind.group(rhs.map { $0 as any SQLBindable & Sendable }))
     }
 
     /// Adds a column to encodable comparison to this builder's `WHERE` clause by `OR`ing.
     @inlinable
     @discardableResult
-    public func orWhere(_ lhs: SQLIdentifier, _ op: SQLBinaryOperator, _ rhs: some Encodable & Sendable) -> Self {
+    public func orWhere(_ lhs: SQLIdentifier, _ op: SQLBinaryOperator, _ rhs: some SQLBindable & Sendable) -> Self {
         self.orWhere(SQLColumn(lhs), op, SQLBind(rhs))
     }
 
     /// Adds a column to encodable array comparison to this builder's `WHERE` clause by `OR`ing.
     @inlinable
     @discardableResult
-    public func orWhere(_ lhs: SQLIdentifier, _ op: SQLBinaryOperator, _ rhs: [some Encodable & Sendable]) -> Self {
-        self.orWhere(SQLColumn(lhs), op, SQLBind.group(rhs))
+    public func orWhere(_ lhs: SQLIdentifier, _ op: SQLBinaryOperator, _ rhs: [some SQLBindable & Sendable]) -> Self {
+        self.orWhere(SQLColumn(lhs), op, SQLBind.group(rhs.map { $0 as any SQLBindable & Sendable }))
     }
 
     // MARK: - Column/column comparison

@@ -75,7 +75,7 @@ extension SQLQueryString {
 extension SQLRaw {
     @available(*, deprecated, message: "Binds set in an `SQLRaw` are ignored. Use `SQLBind`instead.")
     @inlinable
-    public init(_ sql: String, _ binds: [any Encodable & Sendable]) {
+    public init(_ sql: String, _ binds: [any SQLBindable & Sendable]) {
         self.sql = sql
         self.binds = binds
     }

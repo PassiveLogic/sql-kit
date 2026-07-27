@@ -45,7 +45,9 @@ public struct SQLColumnDefinition: SQLExpression {
         dataType: SQLDataType,
         constraints: [SQLColumnConstraintAlgorithm] = []
     ) {
-        self.init(column: SQLIdentifier(name), dataType: dataType, constraints: constraints)
+        // Box each element: the implicit `[SQLColumnConstraintAlgorithm]` to `[any SQLExpression]`
+        // conversion is a dynamic cast (`_arrayForceCast`), which Embedded Swift forbids.
+        self.init(column: SQLIdentifier(name), dataType: dataType, constraints: constraints.map { $0 as any SQLExpression })
     }
 
     // See `SQLExpression.serialize(to:)`.
