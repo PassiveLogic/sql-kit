@@ -1,4 +1,5 @@
 // swift-tools-version:6.1
+import class Foundation.ProcessInfo
 import PackageDescription
 
 /// `.when(platforms:)` can only include, never exclude, so excluding WASI means listing everything else.
@@ -6,6 +7,20 @@ import PackageDescription
 /// Don't add new platforms here unless raising the swift-tools-version of this manifest.
 let allPlatforms: [Platform] = [.macOS, .macCatalyst, .iOS, .tvOS, .watchOS, .visionOS, .driverKit, .linux, .windows, .android, .wasi, .openbsd]
 let nonWASIPlatforms: [Platform] = allPlatforms.filter { $0 != .wasi }
+
+// ┌───────────────────────────────────────────────────────────────────────────────┐
+// │ DOWNSTREAM-ONLY — `integration/khasm-embedded`. NOT FOR UPSTREAM.             │
+// │ Must never be cherry-picked onto feat/wasi-nio-free or feat/embedded-support. │
+// └───────────────────────────────────────────────────────────────────────────────┘
+//
+// Upstream elides NIOCore for ALL of WASI, which removes the `EventLoopFuture` query
+// surface there. khasm's REGULAR wasm flavor still needs it: QuantumStorageCore's
+// QuantumMigrator reads `database.eventLoop` and composes `EventLoopFuture` chains
+// ungated. Only khasm's Embedded/Freestanding flavor (KHASM_EMBEDDED=1) wants the
+// upstream behavior, so the WASI elision is scoped to that flavor; every other build
+// keeps NIOCore, which makes the upstream `#if canImport(NIOCore)` gates inert.
+let khasmEmbedded = ProcessInfo.processInfo.environment["KHASM_EMBEDDED"] == "1"
+let nioPlatforms: [Platform] = khasmEmbedded ? nonWASIPlatforms : allPlatforms
 
 let package = Package(
     name: "sql-kit",
@@ -33,10 +48,11 @@ let package = Package(
                 // NIOCore itself builds for wasm32-unknown-wasip1, but the drivers beneath SQLKit
                 // cannot build SwiftNIO there (NIOPosix needs POSIX sockets and threads), so no
                 // driver on that platform could implement an `EventLoopFuture` surface. Target
-                // dependency conditions are evaluated per platform, so on WASI NIOCore is simply
-                // not linked and that surface drops out via `#if canImport(NIOCore)`; the async
-                // surface is unaffected.
-                .product(name: "NIOCore", package: "swift-nio", condition: .when(platforms: nonWASIPlatforms)),
+                // dependency conditions are evaluated per platform, so where NIOCore is not linked
+                // that surface drops out via `#if canImport(NIOCore)`; the async surface is
+                // unaffected. DOWNSTREAM-ONLY: `nioPlatforms` excludes WASI only under
+                // KHASM_EMBEDDED=1 (see the note at the top of this file).
+                .product(name: "NIOCore", package: "swift-nio", condition: .when(platforms: nioPlatforms)),
             ],
             swiftSettings: swiftSettings
         ),
