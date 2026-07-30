@@ -90,7 +90,7 @@ public struct SQLInsert: SQLExpression {
             $0.append("INTO", self.table)
             $0.append(SQLGroupExpression(self.columns))
             if !self.values.isEmpty {
-                $0.append("VALUES", SQLList(self.values.map(SQLGroupExpression.init)))
+                $0.append("VALUES", SQLList(self.values.map { SQLGroupExpression($0) as any SQLExpression }))
             } else if let subquery = self.valueQuery {
                 $0.append(subquery)
             }

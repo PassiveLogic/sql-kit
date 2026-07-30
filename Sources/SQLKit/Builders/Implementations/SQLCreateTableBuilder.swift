@@ -37,7 +37,7 @@ public final class SQLCreateTableBuilder: SQLQueryBuilder {
     @inlinable
     @discardableResult
     public func column(_ column: String, type dataType: SQLDataType, _ constraints: [SQLColumnConstraintAlgorithm]) -> Self {
-        self.column(SQLIdentifier(column), type: dataType, constraints)
+        self.column(SQLIdentifier(column), type: dataType, constraints.map { $0 as any SQLExpression })
     }
     
     /// Add a new column by name, type, and constraints.
@@ -66,7 +66,9 @@ public final class SQLCreateTableBuilder: SQLQueryBuilder {
     @inlinable
     @discardableResult
     public func column(definitions: [SQLColumnDefinition]) -> SQLCreateTableBuilder {
-        self.columns.append(contentsOf: definitions)
+        // Box each element explicitly: the implicit `[Concrete]` to `[any SQLExpression]` array
+        // conversion is a dynamic cast, which Embedded Swift forbids.
+        self.columns.append(contentsOf: definitions.map { $0 as any SQLExpression })
         return self
     }
 
@@ -125,7 +127,10 @@ extension SQLCreateTableBuilder {
     @inlinable
     @discardableResult
     public func primaryKey(_ columns: [String], named constraintName: String? = nil) -> Self {
-        self.primaryKey(columns.map(SQLIdentifier.init(_:)), named: constraintName.map(SQLIdentifier.init(_:)))
+        // Box each element to `any SQLExpression`: the implicit `[Concrete]`/`Concrete?` to
+        // `[any SQLExpression]`/`(any SQLExpression)?` conversions are dynamic casts, which
+        // Embedded Swift forbids.
+        self.primaryKey(columns.map { SQLIdentifier($0) as any SQLExpression }, named: constraintName.map { SQLIdentifier($0) as any SQLExpression })
     }
 
     /// Add a `PRIMARY KEY` constraint to the table.
@@ -162,7 +167,7 @@ extension SQLCreateTableBuilder {
     @inlinable
     @discardableResult
     public func unique(_ columns: [String], named constraintName: String? = nil) -> Self {
-        self.unique(columns.map(SQLIdentifier.init(_:)), named: constraintName.map(SQLIdentifier.init(_:)))
+        self.unique(columns.map { SQLIdentifier($0) as any SQLExpression }, named: constraintName.map { SQLIdentifier($0) as any SQLExpression })
     }
 
     /// Add a `UNIQUE` constraint to the table.
@@ -188,7 +193,7 @@ extension SQLCreateTableBuilder {
     @inlinable
     @discardableResult
     public func check(_ expression: any SQLExpression, named constraintName: String? = nil) -> Self {
-        self.check(expression, named: constraintName.map(SQLIdentifier.init(_:)))
+        self.check(expression, named: constraintName.map { SQLIdentifier($0) as any SQLExpression })
     }
 
     /// Add a `CHECK` constraint to the table.
@@ -226,10 +231,10 @@ extension SQLCreateTableBuilder {
         named constraintName: String? = nil
     ) -> Self {
         self.foreignKey(
-            columns.map(SQLIdentifier.init(_:)),
-            references: SQLIdentifier(foreignTable), foreignColumns.map(SQLIdentifier.init(_:)),
+            columns.map { SQLIdentifier($0) as any SQLExpression },
+            references: SQLIdentifier(foreignTable), foreignColumns.map { SQLIdentifier($0) as any SQLExpression },
             onDelete: onDelete, onUpdate: onUpdate,
-            named: constraintName.map(SQLIdentifier.init(_:))
+            named: constraintName.map { SQLIdentifier($0) as any SQLExpression }
         )
     }
 

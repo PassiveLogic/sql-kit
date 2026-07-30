@@ -1,3 +1,4 @@
+#if !hasFeature(Embedded) // XCTest and Codable are both unavailable in Embedded Swift.
 import XCTest
 import SQLKit
 
@@ -178,3 +179,5 @@ extension SQLBenchmarker {
         }
     }
 }
+
+#endif // !hasFeature(Embedded)

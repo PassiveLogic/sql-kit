@@ -22,6 +22,10 @@ public protocol SQLRow: Sendable {
     /// of "missing" keys.
     func decodeNil(column: String) throws -> Bool
     
+    // Unavailable in Embedded Swift: it is a generic method requirement (which can't be placed in a
+    // witness table, so it would block `any SQLRow`) and relies on `Decodable`. N.B.: The `#if`
+    // encloses the doc comment; placed between the two it would detach the doc from the symbol graph.
+    #if !hasFeature(Embedded)
     /// If the given column name exists in the row, attempt to decode it as the given type and return the
     /// result if successful.
     ///
@@ -30,8 +34,10 @@ public protocol SQLRow: Sendable {
     ///
     /// Corresponds to `KeyedDecodingContainer.decode(_:forKey:)`.
     func decode<D: Decodable>(column: String, as: D.Type) throws -> D
+    #endif
 }
 
+#if !hasFeature(Embedded)
 extension SQLRow {
     /// Decode an entire `Decodable` "model" type at once, optionally applying a prefix and/or
     /// ``SQLRowDecoder/KeyDecodingStrategy-swift.enum`` to the type's coding keys.
@@ -88,3 +94,4 @@ extension SQLRow {
         try self.decode(column: column, as: D.self)
     }
 }
+#endif  // !hasFeature(Embedded)

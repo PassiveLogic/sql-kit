@@ -39,7 +39,7 @@ extension SQLCreateTriggerBuilder {
     @inlinable
     @discardableResult
     public func body(_ statements: [String]) -> Self {
-        self.body(statements.map { SQLRaw($0) })
+        self.body(statements.map { SQLRaw($0) as any SQLExpression })
     }
 }
 

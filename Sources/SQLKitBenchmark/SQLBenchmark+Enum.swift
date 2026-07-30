@@ -1,3 +1,4 @@
+#if !hasFeature(Embedded) // XCTest and Codable are both unavailable in Embedded Swift.
 import SQLKit
 
 extension SQLBenchmarker {
@@ -116,3 +117,5 @@ private enum PlanetType: String, Codable, SQLExpression {
             .serialize(to: &serializer)
     }
 }
+
+#endif // !hasFeature(Embedded)

@@ -1,3 +1,4 @@
+#if !hasFeature(Embedded) // XCTest and Codable are both unavailable in Embedded Swift.
 import SQLKit
 
 extension SQLBenchmarker {
@@ -44,3 +45,5 @@ fileprivate struct Galaxy: Encodable {
     let id: Int? = nil
     let name: String
 }
+
+#endif // !hasFeature(Embedded)

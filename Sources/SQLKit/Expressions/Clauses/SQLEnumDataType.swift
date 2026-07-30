@@ -15,7 +15,7 @@ public struct SQLEnumDataType: SQLExpression {
     /// - Parameter cases: The list of cases in the enumeration.
     @inlinable
     public init(cases: [String]) {
-        self.init(cases: cases.map(SQLLiteral.string(_:)))
+        self.init(cases: cases.map { SQLLiteral.string($0) as any SQLExpression })
     }
 
     /// Create a new enumeration type with a list of cases.
@@ -59,7 +59,7 @@ extension SQLDataType {
     /// - Returns: An appropriate ``SQLDataType``.
     @inlinable
     public static func `enum`(_ cases: [String]) -> Self {
-        self.enum(cases.map(SQLLiteral.string(_:)))
+        self.enum(cases.map { SQLLiteral.string($0) as any SQLExpression })
     }
 
     /// Translates to an enumeration including the specified list of cases.

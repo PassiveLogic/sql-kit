@@ -144,6 +144,9 @@ public protocol SQLDatabase: Sendable {
         _ onRow: @escaping @Sendable (any SQLRow) -> ()
     ) async throws
     
+    // Generic method requirements can't be placed in a witness table in Embedded Swift (it would
+    // block `any SQLDatabase`); provided as an extension default below instead.
+    #if !hasFeature(Embedded)
     /// Requests the provided closure be called with a database which is guaranteed to represent a single
     /// "session", suitable for e.g. executing a series of queries representing a transaction.
     ///
@@ -158,6 +161,7 @@ public protocol SQLDatabase: Sendable {
     func withSession<R>(
         _ closure: @escaping @Sendable (any SQLDatabase) async throws -> R
     ) async throws -> R
+    #endif
 }
 
 extension SQLDatabase {
@@ -181,7 +185,7 @@ extension SQLDatabase {
     ///
     /// 1. A string containing raw SQL text rendered in the database's dialect, and,
     /// 2. A potentially empty array of values for any bound parameters referenced by the query.
-    public func serialize(_ expression: any SQLExpression) -> (sql: String, binds: [any Encodable & Sendable]) {
+    public func serialize(_ expression: any SQLExpression) -> (sql: String, binds: [any SQLBindable & Sendable]) {
         var serializer = SQLSerializer(database: self)
         expression.serialize(to: &serializer)
         return (serializer.sql, serializer.binds)

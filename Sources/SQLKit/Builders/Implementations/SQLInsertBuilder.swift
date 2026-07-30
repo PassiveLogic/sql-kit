@@ -39,6 +39,8 @@ public final class SQLInsertBuilder: SQLQueryBuilder, SQLReturningBuilder/*, SQL
         self.database = database
     }
     
+    // Codable model encoding (SQLQueryEncoder) is unavailable in Embedded Swift.
+    #if !hasFeature(Embedded)
     /// Use an `Encodable` value to generate a row to insert and add that row to the query.
     ///
     /// Example usage:
@@ -216,7 +218,8 @@ public final class SQLInsertBuilder: SQLQueryBuilder, SQLReturningBuilder/*, SQL
         }
         return self
     }
-    
+    #endif  // !hasFeature(Embedded)
+
     /// Specify mutiple columns to be included in the list of columns for the query.
     ///
     /// Overwrites any previously specified column list.
@@ -232,7 +235,7 @@ public final class SQLInsertBuilder: SQLQueryBuilder, SQLReturningBuilder/*, SQL
     @inlinable
     @discardableResult
     public func columns(_ columns: [String]) -> Self {
-        self.columns(columns.map(SQLIdentifier.init(_:)))
+        self.columns(columns.map { SQLIdentifier($0) as any SQLExpression })
     }
     
     /// Specify mutiple columns to be included in the list of columns for the query.
@@ -258,15 +261,15 @@ public final class SQLInsertBuilder: SQLQueryBuilder, SQLReturningBuilder/*, SQL
     @inlinable
     @discardableResult
     @_disfavoredOverload
-    public func values(_ values: any Encodable & Sendable...) -> Self {
+    public func values(_ values: any SQLBindable & Sendable...) -> Self {
         self.values(values)
     }
     
     /// Add a set of values to be inserted as a single row.
     @inlinable
     @discardableResult
-    public func values(_ values: [any Encodable & Sendable]) -> Self {
-        self.values(values.map { SQLBind($0) })
+    public func values(_ values: [any SQLBindable & Sendable]) -> Self {
+        self.values(values.map { SQLBind($0) as any SQLExpression })
     }
     
     /// Add a set of values to be inserted as a single row.
@@ -334,7 +337,7 @@ public final class SQLInsertBuilder: SQLQueryBuilder, SQLReturningBuilder/*, SQL
     @inlinable
     @discardableResult
     public func ignoringConflicts(with targetColumns: [String] = []) -> Self {
-        self.ignoringConflicts(with: targetColumns.map(SQLIdentifier.init(_:)))
+        self.ignoringConflicts(with: targetColumns.map { SQLIdentifier($0) as any SQLExpression })
     }
 
     /// Specify that constraint violations for the key over the given columns should cause the conflicting
@@ -365,7 +368,7 @@ public final class SQLInsertBuilder: SQLQueryBuilder, SQLReturningBuilder/*, SQL
         with targetColumns: [String] = [],
         `do` updatePredicate: (SQLConflictUpdateBuilder) throws -> SQLConflictUpdateBuilder
     ) rethrows -> Self {
-        try self.onConflict(with: targetColumns.map(SQLIdentifier.init(_:)), do: updatePredicate)
+        try self.onConflict(with: targetColumns.map { SQLIdentifier($0) as any SQLExpression }, do: updatePredicate)
     }
     
     /// Specify that constraint violations for the key over the given column should cause the conflicting
